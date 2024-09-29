@@ -20,7 +20,7 @@ use offsets::OS_LIVE_1_3_0_CONFIG as CONFIG;
 unsafe fn thread_func() {
     Console::AllocConsole().unwrap();
     println!("Wuthering Waves signature check bypass");
-    println!("Don't forget to visit https://discord.gg/reversedrooms");
+    println!("如果你觉得好用请给我好评或前往爱发电支持，交流群:966169739");
 
     let module = GetModuleHandleA(PCSTR::null()).unwrap();
     println!("Base: {:X}", module.0 as usize);
