@@ -1,0 +1,76 @@
+name: Shorekeeper CI/CD
+on:
+  push:
+    branches:
+      - master # 监视 master 分支上的推送
+    tags:
+      - "v*.*.*" # 监视以 'v' 开头的标签
+  pull_request:
+    branches:
+      - master # 监视对 master 分支的拉取请求
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 1.70.0
+          override: true
+
+      - name: Build for cn_beta_1_3_0
+        run: cargo build --release --no-default-features -F cn_beta_1_3_0
+
+      - name: Build for os_live_1_3_0
+        run: cargo build --release --no-default-features -F os_live_1_3_0
+
+      - name: List files in target/release
+        run: ls target/release
+
+      - name: Copy DLL for cn_beta_1_3_0
+        run: |
+          mkdir -p target/release/cn
+          cp target/release/shorekeeper.dll target/release/cn/shorekeeper-cn.dll
+
+      - name: Copy DLL for os_live_1_3_0
+        run: |
+          mkdir -p target/release/os
+          cp target/release/shorekeeper.dll target/release/os/shorekeeper-os.dll
+
+      - name: Create Release
+        id: create_release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset for cn_beta_1_3_0
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: target/release/cn/shorekeeper-cn.dll
+          asset_name: shorekeeper-cn.dll
+          asset_content_type: application/octet-stream
+
+      - name: Upload Release Asset for os_live_1_3_0
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: target/release/os/shorekeeper-os.dll
+          asset_name: shorekeeper-os.dll
+          asset_content_type: application/octet-stream
