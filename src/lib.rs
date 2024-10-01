@@ -11,7 +11,7 @@ use windows::Win32::{Foundation::HINSTANCE, System::LibraryLoader::GetModuleHand
 mod interceptor;
 mod offsets;
 
-#[cfg(feature = "cn_beta_1_3_0")]
+#[cfg(feature = "cn_live_1_3_0")]
 use offsets::CN_BETA_1_3_0_CONFIG as CONFIG;
 
 #[cfg(feature = "os_live_1_3_0")]
@@ -32,7 +32,9 @@ unsafe fn thread_func() {
             fpakfile_check_replacement,
         )
         .unwrap();
-
+    
+    println!("pak_file_check地址为: {:X}", (module.0 as usize) + CONFIG.f_pak_file_check);
+    
     interceptor
         .attach((module.0 as usize) + CONFIG.kuro_http_get, on_kurohttp_get)
         .unwrap();

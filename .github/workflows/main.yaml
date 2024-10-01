@@ -22,8 +22,8 @@ jobs:
           toolchain: 1.70.0
           override: true
 
-      - name: Build for cn_beta_1_3_0
-        run: cargo build --release --no-default-features -F cn_beta_1_3_0
+      - name: Build for cn_live_1_3_0
+        run: cargo build --release --no-default-features -F cn_live_1_3_0
 
       - name: Build for os_live_1_3_0
         run: cargo build --release --no-default-features -F os_live_1_3_0
@@ -31,7 +31,7 @@ jobs:
       - name: List files in target/release
         run: ls target/release
 
-      - name: Copy DLL for cn_beta_1_3_0
+      - name: Copy DLL for cn_live_1_3_0
         run: |
           mkdir -p target/release/cn
           cp target/release/shorekeeper.dll target/release/cn/shorekeeper-cn.dll
@@ -53,7 +53,7 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload Release Asset for cn_beta_1_3_0
+      - name: Upload Release Asset for cn_live_1_3_0
         if: startsWith(github.ref, 'refs/tags/')
         uses: actions/upload-release-asset@v1
         env:
