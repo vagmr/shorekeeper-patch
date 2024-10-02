@@ -1,4 +1,5 @@
 name: Shorekeeper CI/CD
+
 on:
   push:
     branches:
@@ -22,24 +23,11 @@ jobs:
           toolchain: 1.70.0
           override: true
 
-      - name: Build for cn_live_1_3_0
-        run: cargo build --release --no-default-features -F cn_live_1_3_0
+      - name: Run build.bat
+        run: build.bat
 
-      - name: Build for os_live_1_3_0
-        run: cargo build --release --no-default-features -F os_live_1_3_0
-
-      - name: List files in target/release
-        run: ls target/release
-
-      - name: Copy DLL for cn_live_1_3_0
-        run: |
-          mkdir -p target/release/cn
-          cp target/release/shorekeeper.dll target/release/cn/shorekeeper-cn.dll
-
-      - name: Copy DLL for os_live_1_3_0
-        run: |
-          mkdir -p target/release/os
-          cp target/release/shorekeeper.dll target/release/os/shorekeeper-os.dll
+      - name: List files in build
+        run: ls build
 
       - name: Create Release
         id: create_release
@@ -60,8 +48,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: target/release/cn/shorekeeper-cn.dll
-          asset_name: shorekeeper-cn.dll
+          asset_path: build/shorekeeper-cn_live_1_3_0.dll
+          asset_name: shorekeeper-cn_live_1_3_0.dll
           asset_content_type: application/octet-stream
 
       - name: Upload Release Asset for os_live_1_3_0
@@ -71,6 +59,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: target/release/os/shorekeeper-os.dll
-          asset_name: shorekeeper-os.dll
+          asset_path: build/shorekeeper-os_live_1_3_0.dll
+          asset_name: shorekeeper-os_live_1_3_0.dll
           asset_content_type: application/octet-stream

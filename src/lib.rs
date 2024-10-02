@@ -16,10 +16,10 @@ mod offsets;
 
 fn thread_func() {
     unsafe { Console::AllocConsole() }.unwrap();
-    println!("Wuthering Waves essential binary patcher");
-    println!("Don't forget to visit https://discord.gg/reversedrooms");
+    println!("鸣潮核心二进制补丁程序启动中...");
+    println!("如果你觉得好用请给我好评或前往爱发电支持，交流群:966169739");
 
-    println!("Waiting for ACE init");
+    println!("等待ACE初始化完成...");
     let module = unsafe { GetModuleHandleA(PCSTR::null()) }.unwrap();
     let pak_file_offset = ((module.0 as usize) + CONFIG.f_pak_file_check) as *const u128;
     loop {
@@ -56,7 +56,7 @@ fn thread_func() {
     interceptor
         .replace((krsdk_ex.0 as usize) + CONFIG.disable_sdk.sdk_go_away, dummy)
         .unwrap();
-    println!("Successfully initialized!");
+    println!("成功注入!");
 
     thread::sleep(Duration::from_secs(u64::MAX));
 }

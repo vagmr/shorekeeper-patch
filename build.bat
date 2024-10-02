@@ -15,8 +15,8 @@ if exist "build" rd /q /s "build"
 mkdir build
 cargo clean
 
-: Build for cn_beta_1_3_0
-call:cargoReleaseBuild cn_beta_1_3_0
+@REM : Build for cn_beta_1_3_0
+@REM call:cargoReleaseBuild cn_beta_1_3_0
 : Build for cn_live_1_3_0
 call:cargoReleaseBuild cn_live_1_3_0
 : Build for os_live_1_3_0

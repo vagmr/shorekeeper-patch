@@ -8,7 +8,6 @@ name = "shorekeeper"
 crate-type = ["cdylib"]
 
 [features]
-cn_beta_1_3_0 = []
 cn_live_1_3_0 = []
 os_live_1_3_0 = []
 enable-sdk = []
