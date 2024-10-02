@@ -2,59 +2,62 @@ use std::thread;
 use std::time::Duration;
 
 use ilhook::x64::Registers;
-use interceptor::Interceptor;
-use windows::core::{w, PCSTR, PCWSTR};
+use windows::core::{PCSTR, PCWSTR, w};
+use windows::Win32::Foundation::HINSTANCE;
 use windows::Win32::System::Console;
+use windows::Win32::System::LibraryLoader::GetModuleHandleA;
 use windows::Win32::System::SystemServices::DLL_PROCESS_ATTACH;
-use windows::Win32::{Foundation::HINSTANCE, System::LibraryLoader::GetModuleHandleA};
+
+use interceptor::Interceptor;
+use offsets::CONFIG;
 
 mod interceptor;
 mod offsets;
 
-#[cfg(feature = "cn_live_1_3_0")]
-use offsets::CN_BETA_1_3_0_CONFIG as CONFIG;
+fn thread_func() {
+    unsafe { Console::AllocConsole() }.unwrap();
+    println!("Wuthering Waves essential binary patcher");
+    println!("Don't forget to visit https://discord.gg/reversedrooms");
 
-#[cfg(feature = "os_live_1_3_0")]
-use offsets::OS_LIVE_1_3_0_CONFIG as CONFIG;
-
-unsafe fn thread_func() {
-    Console::AllocConsole().unwrap();
-    println!("Wuthering Waves signature check bypass");
-    println!("如果你觉得好用请给我好评或前往爱发电支持，交流群:966169739");
-
-    let module = GetModuleHandleA(PCSTR::null()).unwrap();
-    println!("Base: {:X}", module.0 as usize);
+    println!("Waiting for ACE init");
+    let module = unsafe { GetModuleHandleA(PCSTR::null()) }.unwrap();
+    let pak_file_offset = ((module.0 as usize) + CONFIG.f_pak_file_check) as *const u128;
+    loop {
+        if unsafe { std::ptr::read(pak_file_offset) } == CONFIG.f_pak_file_check_preamble {
+            println!("ACE Initialization finished");
+            break;
+        }
+        thread::sleep(Duration::from_millis(1))
+    }
 
     let mut interceptor = Interceptor::new();
     interceptor
-        .replace(
-            (module.0 as usize) + CONFIG.f_pak_file_check,
-            fpakfile_check_replacement,
-        )
+        .replace((module.0 as usize) + CONFIG.f_pak_file_check, fpakfile_check_replacement)
         .unwrap();
-    
-    println!("pak_file_check地址为: {:X}", (module.0 as usize) + CONFIG.f_pak_file_check);
-    
+
+    let module = unsafe { GetModuleHandleA(PCSTR::null()) }.unwrap();
+    println!("Game base: {:X}", module.0 as usize);
+
     interceptor
         .attach((module.0 as usize) + CONFIG.kuro_http_get, on_kurohttp_get)
         .unwrap();
 
     let krsdk_ex = loop {
-        match GetModuleHandleA(CONFIG.sdk_dll) {
+        match unsafe { GetModuleHandleA(CONFIG.disable_sdk.sdk_dll) } {
             Ok(handle) => break handle,
             Err(_) => thread::sleep(Duration::from_millis(1)),
         }
     };
 
     interceptor
-        .replace((krsdk_ex.0 as usize) + CONFIG.eula_accept, dummy)
+        .replace((krsdk_ex.0 as usize) + CONFIG.disable_sdk.eula_accept, dummy)
         .unwrap();
 
     interceptor
-        .replace((krsdk_ex.0 as usize) + CONFIG.sdk_go_away, dummy)
+        .replace((krsdk_ex.0 as usize) + CONFIG.disable_sdk.sdk_go_away, dummy)
         .unwrap();
-
     println!("Successfully initialized!");
+
     thread::sleep(Duration::from_secs(u64::MAX));
 }
 
