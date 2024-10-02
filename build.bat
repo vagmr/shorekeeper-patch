@@ -22,4 +22,3 @@ call:cargoReleaseBuild cn_live_1_3_0
 : Build for os_live_1_3_0
 call:cargoReleaseBuild os_live_1_3_0
 
-tar -acvf shorekeeper-patch-win64.zip -C build
