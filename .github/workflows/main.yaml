@@ -24,7 +24,7 @@ jobs:
           override: true
 
       - name: Run build.bat
-        run: build.bat
+        run: .\build.bat
 
       - name: List files in build
         run: ls build
